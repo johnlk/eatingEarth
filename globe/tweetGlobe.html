@@ -119,58 +119,51 @@
   <script type="text/javascript">
 
     THREE.ImageUtils.crossOrigin = "";
-
-    if(!Detector.webgl){
+  
+    if (!Detector.webgl) {
       Detector.addGetWebGLMessage();
     } else {
-
-
-      var container = document.getElementById('container');
-      var globe = DAT.Globe(container, {
+      const container = document.getElementById('container');
+  
+      const globe = DAT.Globe(container, {
         colorFn: function(label){
           return new THREE.Color([0xff3333, 0x0000cc][label]);
         }
       });
-
+  
       globe.animate();
-
+  
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchTerm = urlParams.get('searchTerm');
+  
       PUBNUB.init({
         subscribe_key: 'sub-c-78806dd4-42a6-11e4-aed8-02ee2ddab7fe'
       }).subscribe({
         channel : 'pubnub-twitter',
-        message : function(msg){
-
-          if(msg.text.indexOf(window.location.href.split('?')[1]) != -1){
-
+        message : function(msg) {
+          if (msg.text.includes(searchTerm)) {
             document.getElementById('title').innerHTML = msg.text;
-
-            // console.log(msg);
-
-            var data = [];
-
-            if(msg.geo){
-              data.push(msg.geo.coordinates[0]);//lat
-              data.push(msg.geo.coordinates[1]);//long
-            }else{
+  
+            const data = [];
+            if (msg.geo) {
+              data.push(msg.geo.coordinates[0]); //lat
+              data.push(msg.geo.coordinates[1]); //long
+            } else {
               data.push(msg.place.bounding_box.coordinates[0][0][1]);
               data.push(msg.place.bounding_box.coordinates[0][0][0]);
             }
-
             data.push(0.1);
             data.push(0);
-
+  
             globe.addData(data, {format: 'legend'});
             globe.createPoints();
-
-          }          
-
+          }  
         }
       });
-
-      
     }
-
+  
   </script>
+  
 
   </body>
 
